@@ -15,11 +15,15 @@ use App\Http\Controllers\API\AuthController;
 |
 */
 
-Route::post('/auth/login', [AuthController::class, 'authenticate']);
+Route::post('/auth/login-client', [AuthController::class, 'authenticateClient']);
+Route::post('/auth/login-admin', [AuthController::class, 'authenticateAdmin']);
 Route::post('/auth/register', [AuthController::class, 'create']); 
 Route::get('/getUsers', [AuthController::class, 'getUsers']); 
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+Route::middleware('auth:sanctum')->get('/admin', function (Request $request) {
+    return $request->admin();
 });

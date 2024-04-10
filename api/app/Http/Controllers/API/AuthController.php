@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\AuthenticateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\AuthenticatedUserResource;
@@ -16,16 +17,37 @@ use App\Http\Resources\CreateUserResource;
 
 class AuthController extends Controller
 {
-    public function authenticate(AuthenticateUserRequest $request)
+    public function authenticateClient(AuthenticateUserRequest $request)
     {
-        $email = $request->email;
+        $userName = $request->userName;
         $password = $request->password;
 
-        $user = User::where('email', $email)->first();
+        $user = User::where('userName', $userName)->first();
 
         if (!$user || !Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Invalid Login credentials']
+                'userName' => ['Invalid Login credentials']
+            ]);
+        }
+
+        $request = (object)[
+            'user' => new UserResource($user),
+            'token' =>$user->createToken('auth-token')->plainTextToken
+        ];
+        return new AuthenticatedUserResource($request);
+    }
+
+    //duplicate for admin
+    public function authenticateAdmin(AuthenticateUserRequest $request)
+    {
+        $userName = $request->userName;
+        $password = $request->password;
+
+        $user = Admin::where('userName', $userName)->first();
+
+        if (!$user || !Hash::check($password, $user->password)) {
+            throw ValidationException::withMessages([
+                'userName' => ['Invalid Login credentials']
             ]);
         }
 
